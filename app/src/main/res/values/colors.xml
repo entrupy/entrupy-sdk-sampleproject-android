@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Entrupy Brand Colors -->
+    <color name="entrupy_background">#0A0E17</color>
+    <color name="entrupy_surface">#151B28</color>
+    <color name="entrupy_primary">#00D9FF</color>
+    <color name="entrupy_gold">#FFD183</color>
+    <color name="entrupy_gold_dark">#E1AB50</color>
+    <color name="entrupy_on_surface">#E8ECF4</color>
+    <color name="entrupy_on_surface_variant">#6B7A99</color>
+    
+    <!-- App Launcher Icon Background -->
+    <color name="ic_launcher_background">#FFFFFF</color>
+    
+    <!-- Legacy (for compatibility) -->
+    <color name="entrupy_blue">#00D9FF</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+</resources>
