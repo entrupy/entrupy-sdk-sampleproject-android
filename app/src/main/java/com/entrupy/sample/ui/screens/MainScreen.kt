@@ -15,7 +15,6 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,19 +41,13 @@ import com.entrupy.sdk.listeners.SdkLoginCallback
 import com.entrupy.sdk.model.METADATA_KEY_BRAND
 import com.entrupy.sdk.model.METADATA_KEY_CUSTOMER_ITEM_ID
 import com.entrupy.sdk.model.METADATA_KEY_ITEM_TYPE
-import com.entrupy.sdk.model.METADATA_KEY_MATERIAL
-import com.entrupy.sdk.model.METADATA_KEY_PRODUCT_CATEGORY
-import com.entrupy.sdk.model.METADATA_KEY_STYLE_CODE
-import com.entrupy.sdk.model.METADATA_KEY_STYLE_NAME
-import com.entrupy.sdk.model.METADATA_KEY_US_SIZE
-import com.entrupy.sdk.model.ProductCategory
 import kotlinx.coroutines.launch
 
 private const val TAG = "EntrupySampleApp"
 
 /**
  * Main screen demonstrating the complete Entrupy SDK integration flow:
- * 
+ *
  * 1. Generate SDK authorization request
  * 2. Login to partner backend
  * 3. Send auth request to partner backend for signing
@@ -84,51 +77,15 @@ fun MainScreen(modifier: Modifier = Modifier) {
     
     // Check if backend is properly configured
     val isBackendConfigured = remember { PartnerApiClient.isConfigured }
-    val isSampleBackend = remember { 
-        PartnerApiClient.backendUrl.contains("sample-partner-sdk-server.entrupy.com") 
+    val isSampleBackend = remember {
+        PartnerApiClient.backendUrl.contains("sample-partner-sdk-server.entrupy.com")
     }
-    
-    // Capture configuration
-    var selectedCategoryIndex by remember { mutableIntStateOf(2) } // Default to Apparel
+
     var brandId by remember { mutableStateOf("bape") }
-    
-    // Category-specific fields with defaults
-    // Luxury: material (e.g., "monogram canvas", "epi leather", "damier ebene")
-    var material by remember { mutableStateOf("monogram canvas") }
-    
-    // Sneakers: style_name, style_code, us_size
-    var styleName by remember { mutableStateOf("air jordan 1 retro high") }
-    var styleCode by remember { mutableStateOf("") }  // e.g., "DO7097-100"
-    var usSize by remember { mutableStateOf("") }     // e.g., "9.5"
-    
-    // Apparel: item_type (e.g., "outerwear", "tops", "bottoms", "hats")
     var itemType by remember { mutableStateOf("outerwear") }
-    
     var customerItemId by remember { mutableStateOf("SAMPLE-ITEM-001") }
     var isCaptureLoading by remember { mutableStateOf(false) }
-    
-    val categories = remember { ProductCategory.all() }
-    
-    // Update defaults when category changes
-    LaunchedEffect(selectedCategoryIndex) {
-        when (categories[selectedCategoryIndex]) {
-            ProductCategory.Luxury -> {
-                brandId = "louis vuitton"
-                material = "monogram canvas"
-            }
-            ProductCategory.Sneakers -> {
-                brandId = "nike"
-                styleName = "air jordan 1 retro high"
-                styleCode = ""
-                usSize = ""
-            }
-            ProductCategory.Apparel -> {
-                brandId = "bape"
-                itemType = "outerwear"
-            }
-        }
-    }
-    
+
     /**
      * Complete login flow
      */
@@ -148,7 +105,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
                 val loginResponse = PartnerApiClient.api.login(
                     LoginRequest(username = partnerUsername, password = partnerPassword)
                 )
-                val partnerToken = loginResponse.token 
+                val partnerToken = loginResponse.token
                     ?: throw Exception("Partner login failed: no token received")
                 Log.d(TAG, "Partner login successful")
                 
@@ -174,14 +131,14 @@ fun MainScreen(modifier: Modifier = Modifier) {
                         override fun onLoginStarted() {
                             Log.d(TAG, "SDK login started")
                         }
-                        
+
                         override fun onLoginSuccess(expirationTime: Long) {
                             isLoading = false
                             isAuthorized = true
                             statusMessage = "Login successful! Ready to capture."
                             Log.d(TAG, "SDK login success, expires: $expirationTime")
                         }
-                        
+
                         override fun onLoginError(
                             errorCode: Int,
                             description: String,
@@ -196,7 +153,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
                         }
                     }
                 )
-                
+
             } catch (e: Exception) {
                 isLoading = false
                 statusMessage = "Login failed"
@@ -206,7 +163,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
             }
         }
     }
-    
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -224,13 +181,13 @@ fun MainScreen(modifier: Modifier = Modifier) {
             fontWeight = FontWeight.Bold,
             color = AccentGold
         )
-        
+
         Text(
             text = "SDK Sample",
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        
+
         Spacer(modifier = Modifier.height(32.dp))
         
         // Configuration Info Card (when using sample backend or missing config)
@@ -266,16 +223,16 @@ fun MainScreen(modifier: Modifier = Modifier) {
             isAuthorized = isAuthorized,
             statusMessage = statusMessage
         )
-        
+
         Spacer(modifier = Modifier.height(24.dp))
         
         // Login Section
         if (!isAuthorized) {
             EntrupyCard(
                 title = "Partner Credentials",
-                description = if (hasPreConfiguredCredentials) 
-                    "Credentials loaded from local.properties" 
-                else 
+                description = if (hasPreConfiguredCredentials)
+                    "Credentials loaded from local.properties"
+                else
                     "Enter your partner backend credentials"
             ) {
                 OutlinedTextField(
@@ -289,9 +246,9 @@ fun MainScreen(modifier: Modifier = Modifier) {
                         { Text("Pre-configured", color = AccentGreen) }
                     } else null
                 )
-                
+
                 Spacer(modifier = Modifier.height(12.dp))
-                
+
                 OutlinedTextField(
                     value = partnerPassword,
                     onValueChange = { partnerPassword = it },
@@ -303,9 +260,9 @@ fun MainScreen(modifier: Modifier = Modifier) {
                         { Text("Pre-configured", color = AccentGreen) }
                     } else null
                 )
-                
+
                 Spacer(modifier = Modifier.height(20.dp))
-                
+
                 EntrupyButton(
                     text = if (isLoading) statusMessage else "Login & Authorize",
                     onClick = { performFullLogin() },
@@ -314,140 +271,38 @@ fun MainScreen(modifier: Modifier = Modifier) {
                 )
             }
         }
-        
+
         // Capture Configuration (shown when authorized)
         if (isAuthorized) {
             EntrupyCard(
                 title = "Capture Configuration",
                 description = "Configure the item to authenticate"
             ) {
-                // Product Category Selection
-                Text(
-                    text = "Product Category",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.align(Alignment.Start)
-                )
-                
-                Spacer(modifier = Modifier.height(8.dp))
-                
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    categories.forEachIndexed { index, category ->
-                        FilterChip(
-                            selected = selectedCategoryIndex == index,
-                            onClick = { selectedCategoryIndex = index },
-                            label = { 
-                                Text(
-                                    category.displayName,
-                                    fontSize = 12.sp
-                                ) 
-                            },
-                            modifier = Modifier.weight(1f),
-                            colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = AccentGold.copy(alpha = 0.2f),
-                                selectedLabelColor = AccentGold
-                            )
-                        )
-                    }
-                }
-                
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                // Get selected category
-                val selectedCategory = categories[selectedCategoryIndex]
-                
-                // Brand field with category-specific placeholder
+                // Brand field
                 OutlinedTextField(
                     value = brandId,
                     onValueChange = { brandId = it },
                     label = { Text("Brand") },
-                    placeholder = { 
-                        Text(
-                            when (selectedCategory) {
-                                ProductCategory.Luxury -> "e.g., louis vuitton, gucci, chanel"
-                                ProductCategory.Sneakers -> "e.g., nike, adidas, new balance"
-                                ProductCategory.Apparel -> "e.g., bape, supreme, off-white"
-                            }
-                        ) 
-                    },
+                    placeholder = { Text("e.g., bape, supreme, louis vuitton") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     colors = entrupyTextFieldColors()
                 )
-                
+
                 Spacer(modifier = Modifier.height(12.dp))
-                
-                // Category-specific fields
-                when (selectedCategory) {
-                    ProductCategory.Luxury -> {
-                        OutlinedTextField(
-                            value = material,
-                            onValueChange = { material = it },
-                            label = { Text("Material") },
-                            placeholder = { Text("e.g., monogram canvas, epi leather, damier ebene") },
-                            modifier = Modifier.fillMaxWidth(),
-                            singleLine = true,
-                            colors = entrupyTextFieldColors()
-                        )
-                    }
-                    ProductCategory.Sneakers -> {
-                        // Style Name
-                        OutlinedTextField(
-                            value = styleName,
-                            onValueChange = { styleName = it },
-                            label = { Text("Style Name") },
-                            placeholder = { Text("e.g., air jordan 1 retro high, yeezy boost 350") },
-                            modifier = Modifier.fillMaxWidth(),
-                            singleLine = true,
-                            colors = entrupyTextFieldColors()
-                        )
-                        
-                        Spacer(modifier = Modifier.height(12.dp))
-                        
-                        // Style Code and US Size in a row
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            OutlinedTextField(
-                                value = styleCode,
-                                onValueChange = { styleCode = it },
-                                label = { Text("Style Code") },
-                                placeholder = { Text("DO7097-100") },
-                                modifier = Modifier.weight(1f),
-                                singleLine = true,
-                                colors = entrupyTextFieldColors()
-                            )
-                            
-                            OutlinedTextField(
-                                value = usSize,
-                                onValueChange = { usSize = it },
-                                label = { Text("US Size") },
-                                placeholder = { Text("9.5") },
-                                modifier = Modifier.weight(0.6f),
-                                singleLine = true,
-                                colors = entrupyTextFieldColors()
-                            )
-                        }
-                    }
-                    ProductCategory.Apparel -> {
-                        OutlinedTextField(
-                            value = itemType,
-                            onValueChange = { itemType = it },
-                            label = { Text("Item Type") },
-                            placeholder = { Text("e.g., outerwear, tops, bottoms, hats") },
-                            modifier = Modifier.fillMaxWidth(),
-                            singleLine = true,
-                            colors = entrupyTextFieldColors()
-                        )
-                    }
-                }
-                
+
+                OutlinedTextField(
+                    value = itemType,
+                    onValueChange = { itemType = it },
+                    label = { Text("Item Type") },
+                    placeholder = { Text("e.g., outerwear, tops, bottoms, hats") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    colors = entrupyTextFieldColors()
+                )
+
                 Spacer(modifier = Modifier.height(12.dp))
-                
+
                 OutlinedTextField(
                     value = customerItemId,
                     onValueChange = { customerItemId = it },
@@ -457,55 +312,27 @@ fun MainScreen(modifier: Modifier = Modifier) {
                     singleLine = true,
                     colors = entrupyTextFieldColors()
                 )
-                
+
                 Spacer(modifier = Modifier.height(20.dp))
-                
+
                 EntrupyButton(
                     text = if (isCaptureLoading) "Starting..." else "Start Capture",
                     onClick = {
                         isCaptureLoading = true
-                        val category = categories[selectedCategoryIndex]
-                        
-                        // Build metadata based on category
+
                         // See README.md for full list of available metadata keys
                         val metadata = buildMap<String, Any?> {
-                            put(METADATA_KEY_PRODUCT_CATEGORY, category.displayName.lowercase())
                             put(METADATA_KEY_BRAND, brandId.lowercase().trim())
-                            
-                            // Category-specific fields
-                            when (category) {
-                                ProductCategory.Luxury -> {
-                                    // Luxury supports: material
-                                    if (material.isNotBlank()) {
-                                        put(METADATA_KEY_MATERIAL, material.lowercase().trim())
-                                    }
-                                }
-                                ProductCategory.Sneakers -> {
-                                    // Sneakers supports: style_name, style_code, us_size
-                                    if (styleName.isNotBlank()) {
-                                        put(METADATA_KEY_STYLE_NAME, styleName.lowercase().trim())
-                                    }
-                                    if (styleCode.isNotBlank()) {
-                                        put(METADATA_KEY_STYLE_CODE, styleCode.uppercase().trim())
-                                    }
-                                    if (usSize.isNotBlank()) {
-                                        put(METADATA_KEY_US_SIZE, usSize.trim())
-                                    }
-                                }
-                                ProductCategory.Apparel -> {
-                                    // Apparel requires: item_type
-                                    if (itemType.isNotBlank()) {
-                                        put(METADATA_KEY_ITEM_TYPE, itemType.lowercase().trim())
-                                    }
-                                }
+                            if (itemType.isNotBlank()) {
+                                put(METADATA_KEY_ITEM_TYPE, itemType.lowercase().trim())
                             }
-                            
-                            // Include customer_item_id if provided (works for all categories)
+
+                            // Include customer_item_id if provided
                             if (customerItemId.isNotBlank()) {
                                 put(METADATA_KEY_CUSTOMER_ITEM_ID, customerItemId)
                             }
                         }
-                        
+
                         entrupyApp.startCapture(
                             configMetadata = metadata,
                             callback = object : CaptureCallback {
@@ -514,21 +341,27 @@ fun MainScreen(modifier: Modifier = Modifier) {
                                     statusMessage = "Capture flow started"
                                     Log.d(TAG, "Capture started for brand: $brandId")
                                 }
-                                
+
                                 override fun onCaptureError(errorCode: Int, description: String) {
                                     isCaptureLoading = false
                                     statusMessage = "Capture failed"
                                     errorMessage = when (errorCode) {
-                                        EntrupyErrorCode.NO_MATCHING_CONFIG -> 
-                                            "No configuration found for brand '$brandId' in ${category.displayName}"
-                                        EntrupyErrorCode.SDK_NOT_INITIALIZED -> 
+                                        EntrupyErrorCode.NO_MATCHING_CONFIG ->
+                                            "No configuration found for brand '$brandId'"
+                                        EntrupyErrorCode.SDK_NOT_INITIALIZED ->
                                             "SDK not initialized"
-                                        EntrupyErrorCode.UNAUTHORIZED_ACCESS -> 
+                                        EntrupyErrorCode.UNAUTHORIZED_ACCESS ->
                                             "Authorization expired. Please login again."
                                         else -> description
                                     }
                                     showError = true
                                     Log.e(TAG, "Capture error: $description (Code: $errorCode)")
+                                }
+
+                                override fun onFallbackOpened() {
+                                    isCaptureLoading = false
+                                    statusMessage = "Brand fallback opened"
+                                    Log.d(TAG, "SDK opened brand fallback for '$brandId'")
                                 }
                             }
                         )
@@ -538,7 +371,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
                     icon = { Icon(Icons.Default.CameraAlt, contentDescription = null, tint = Color.Black) }
                 )
             }
-            
+
             Spacer(modifier = Modifier.height(16.dp))
             
             // Logout Button
@@ -562,7 +395,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
                 Text("Logout")
             }
         }
-        
+
         Spacer(modifier = Modifier.height(40.dp))
         
         // Footer
@@ -572,7 +405,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
         )
-        
+
         Spacer(modifier = Modifier.height(16.dp))
     }
     
@@ -661,9 +494,9 @@ private fun AuthorizationStatusCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = if (isAuthorized) 
+            containerColor = if (isAuthorized)
                 AccentGreen.copy(alpha = 0.1f)
-            else 
+            else
                 CardBackground
         ),
         shape = RoundedCornerShape(12.dp)
@@ -680,9 +513,9 @@ private fun AuthorizationStatusCard(
                 tint = if (isAuthorized) AccentGreen else MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(28.dp)
             )
-            
+
             Spacer(modifier = Modifier.width(12.dp))
-            
+
             Column {
                 Text(
                     text = if (isAuthorized) "Authorized" else "Not Authorized",
@@ -709,14 +542,14 @@ private fun ConfigurationInfoCard(
     message: String,
     isWarning: Boolean
 ) {
-    val backgroundColor = if (isWarning) 
+    val backgroundColor = if (isWarning)
         Color(0xFF4A3A00).copy(alpha = 0.5f) // Amber warning
-    else 
+    else
         Color(0xFF1A3A4A).copy(alpha = 0.5f) // Cyan info
-    
+
     val borderColor = if (isWarning) AccentGold else MaterialTheme.colorScheme.primary
     val iconColor = if (isWarning) AccentGold else MaterialTheme.colorScheme.primary
-    
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = backgroundColor),
@@ -735,9 +568,9 @@ private fun ConfigurationInfoCard(
                 tint = iconColor,
                 modifier = Modifier.size(24.dp)
             )
-            
+
             Spacer(modifier = Modifier.width(12.dp))
-            
+
             Column {
                 Text(
                     text = title,
@@ -782,15 +615,15 @@ private fun EntrupyCard(
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface
             )
-            
+
             Text(
                 text = description,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            
+
             Spacer(modifier = Modifier.height(20.dp))
-            
+
             content()
         }
     }

@@ -23,14 +23,10 @@ import com.entrupy.sample.ui.theme.*
 
 /**
  * Preview file for MainScreen composables.
- * 
+ *
  * This file contains preview-only composables that mirror the private composables
  * in MainScreen.kt for Android Studio preview purposes.
  */
-
-// =============================================================================
-// Preview Composables (duplicated for preview visibility)
-// =============================================================================
 
 @Composable
 private fun PreviewEntrupyCard(
@@ -54,15 +50,15 @@ private fun PreviewEntrupyCard(
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface
             )
-            
+
             Text(
                 text = description,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            
+
             Spacer(modifier = Modifier.height(20.dp))
-            
+
             content()
         }
     }
@@ -76,9 +72,9 @@ private fun PreviewAuthorizationStatusCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = if (isAuthorized) 
+            containerColor = if (isAuthorized)
                 AccentGreen.copy(alpha = 0.1f)
-            else 
+            else
                 CardBackground
         ),
         shape = RoundedCornerShape(12.dp)
@@ -95,9 +91,9 @@ private fun PreviewAuthorizationStatusCard(
                 tint = if (isAuthorized) AccentGreen else MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(28.dp)
             )
-            
+
             Spacer(modifier = Modifier.width(12.dp))
-            
+
             Column {
                 Text(
                     text = if (isAuthorized) "Authorized" else "Not Authorized",
@@ -121,14 +117,14 @@ private fun PreviewConfigurationInfoCard(
     message: String,
     isWarning: Boolean
 ) {
-    val backgroundColor = if (isWarning) 
+    val backgroundColor = if (isWarning)
         Color(0xFF4A3A00).copy(alpha = 0.5f)
-    else 
+    else
         Color(0xFF1A3A4A).copy(alpha = 0.5f)
-    
+
     val borderColor = if (isWarning) AccentGold else MaterialTheme.colorScheme.primary
     val iconColor = if (isWarning) AccentGold else MaterialTheme.colorScheme.primary
-    
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = backgroundColor),
@@ -147,9 +143,9 @@ private fun PreviewConfigurationInfoCard(
                 tint = iconColor,
                 modifier = Modifier.size(24.dp)
             )
-            
+
             Spacer(modifier = Modifier.width(12.dp))
-            
+
             Column {
                 Text(
                     text = title,
@@ -240,7 +236,7 @@ private fun PreviewMainScreenNotAuthorized() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(24.dp))
-            
+
             // Header
             Text(
                 text = "entrupy",
@@ -248,15 +244,15 @@ private fun PreviewMainScreenNotAuthorized() {
                 fontWeight = FontWeight.Bold,
                 color = AccentGold
             )
-            
+
             Text(
                 text = "SDK Sample",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            
+
             Spacer(modifier = Modifier.height(32.dp))
-            
+
             // Sample Backend Info Card
             PreviewConfigurationInfoCard(
                 title = "Using Sample Backend",
@@ -269,17 +265,17 @@ private fun PreviewMainScreenNotAuthorized() {
                     "• partner.password",
                 isWarning = false
             )
-            
+
             Spacer(modifier = Modifier.height(16.dp))
-            
+
             // Authorization Status
             PreviewAuthorizationStatusCard(
                 isAuthorized = false,
                 statusMessage = "Ready to integrate with Entrupy SDK"
             )
-            
+
             Spacer(modifier = Modifier.height(24.dp))
-            
+
             // Login Card
             PreviewEntrupyCard(
                 title = "Partner Credentials",
@@ -293,9 +289,9 @@ private fun PreviewMainScreenNotAuthorized() {
                     singleLine = true,
                     colors = entrupyTextFieldColors()
                 )
-                
+
                 Spacer(modifier = Modifier.height(12.dp))
-                
+
                 OutlinedTextField(
                     value = "••••••",
                     onValueChange = {},
@@ -304,9 +300,9 @@ private fun PreviewMainScreenNotAuthorized() {
                     singleLine = true,
                     colors = entrupyTextFieldColors()
                 )
-                
+
                 Spacer(modifier = Modifier.height(20.dp))
-                
+
                 PreviewEntrupyButton(text = "Login & Authorize")
             }
         }
@@ -315,7 +311,7 @@ private fun PreviewMainScreenNotAuthorized() {
 
 @Preview(showBackground = true, backgroundColor = 0xFF0A0E17)
 @Composable
-private fun PreviewMainScreenAuthorizedLuxury() {
+private fun PreviewMainScreenAuthorized() {
     EntrupySampleTheme {
         Column(
             modifier = Modifier
@@ -326,131 +322,7 @@ private fun PreviewMainScreenAuthorizedLuxury() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(24.dp))
-            
-            // Header
-            Text(
-                text = "entrupy",
-                style = MaterialTheme.typography.displayLarge,
-                fontWeight = FontWeight.Bold,
-                color = AccentGold
-            )
-            
-            Text(
-                text = "SDK Sample",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            
-            Spacer(modifier = Modifier.height(32.dp))
-            
-            // Authorization Status - Authorized
-            PreviewAuthorizationStatusCard(
-                isAuthorized = true,
-                statusMessage = "Login successful! Ready to capture."
-            )
-            
-            Spacer(modifier = Modifier.height(24.dp))
-            
-            // Capture Configuration - Luxury
-            PreviewEntrupyCard(
-                title = "Capture Configuration",
-                description = "Configure the item to authenticate"
-            ) {
-                Text(
-                    text = "Product Category",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.align(Alignment.Start)
-                )
-                
-                Spacer(modifier = Modifier.height(8.dp))
-                
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    FilterChip(
-                        selected = true,
-                        onClick = {},
-                        label = { Text("Luxury", fontSize = 12.sp) },
-                        modifier = Modifier.weight(1f),
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = AccentGold.copy(alpha = 0.2f),
-                            selectedLabelColor = AccentGold
-                        )
-                    )
-                    FilterChip(
-                        selected = false,
-                        onClick = {},
-                        label = { Text("Sneakers", fontSize = 12.sp) },
-                        modifier = Modifier.weight(1f)
-                    )
-                    FilterChip(
-                        selected = false,
-                        onClick = {},
-                        label = { Text("Apparel", fontSize = 12.sp) },
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-                
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                OutlinedTextField(
-                    value = "louis vuitton",
-                    onValueChange = {},
-                    label = { Text("Brand") },
-                    placeholder = { Text("e.g., louis vuitton, gucci, chanel") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    colors = entrupyTextFieldColors()
-                )
-                
-                Spacer(modifier = Modifier.height(12.dp))
-                
-                OutlinedTextField(
-                    value = "monogram canvas",
-                    onValueChange = {},
-                    label = { Text("Material") },
-                    placeholder = { Text("e.g., monogram canvas, epi leather") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    colors = entrupyTextFieldColors()
-                )
-                
-                Spacer(modifier = Modifier.height(12.dp))
-                
-                OutlinedTextField(
-                    value = "LV-NF-001",
-                    onValueChange = {},
-                    label = { Text("Customer Item ID") },
-                    placeholder = { Text("Your internal SKU") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    colors = entrupyTextFieldColors()
-                )
-                
-                Spacer(modifier = Modifier.height(20.dp))
-                
-                PreviewEntrupyButton(text = "Start Capture")
-            }
-        }
-    }
-}
 
-@Preview(showBackground = true, backgroundColor = 0xFF0A0E17)
-@Composable
-private fun PreviewMainScreenAuthorizedSneakers() {
-    EntrupySampleTheme {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Background)
-                .verticalScroll(rememberScrollState())
-                .padding(20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Spacer(modifier = Modifier.height(24.dp))
-            
             // Header
             Text(
                 text = "entrupy",
@@ -458,219 +330,28 @@ private fun PreviewMainScreenAuthorizedSneakers() {
                 fontWeight = FontWeight.Bold,
                 color = AccentGold
             )
-            
-            Text(
-                text = "SDK Sample",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            
-            Spacer(modifier = Modifier.height(32.dp))
-            
-            // Authorization Status - Authorized
-            PreviewAuthorizationStatusCard(
-                isAuthorized = true,
-                statusMessage = "Login successful! Ready to capture."
-            )
-            
-            Spacer(modifier = Modifier.height(24.dp))
-            
-            // Capture Configuration - Sneakers
-            PreviewEntrupyCard(
-                title = "Capture Configuration",
-                description = "Configure the item to authenticate"
-            ) {
-                Text(
-                    text = "Product Category",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.align(Alignment.Start)
-                )
-                
-                Spacer(modifier = Modifier.height(8.dp))
-                
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    FilterChip(
-                        selected = false,
-                        onClick = {},
-                        label = { Text("Luxury", fontSize = 12.sp) },
-                        modifier = Modifier.weight(1f)
-                    )
-                    FilterChip(
-                        selected = true,
-                        onClick = {},
-                        label = { Text("Sneakers", fontSize = 12.sp) },
-                        modifier = Modifier.weight(1f),
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = AccentGold.copy(alpha = 0.2f),
-                            selectedLabelColor = AccentGold
-                        )
-                    )
-                    FilterChip(
-                        selected = false,
-                        onClick = {},
-                        label = { Text("Apparel", fontSize = 12.sp) },
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-                
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                OutlinedTextField(
-                    value = "nike",
-                    onValueChange = {},
-                    label = { Text("Brand") },
-                    placeholder = { Text("e.g., nike, adidas, new balance") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    colors = entrupyTextFieldColors()
-                )
-                
-                Spacer(modifier = Modifier.height(12.dp))
-                
-                OutlinedTextField(
-                    value = "air jordan 1 retro high",
-                    onValueChange = {},
-                    label = { Text("Style Name") },
-                    placeholder = { Text("e.g., air jordan 1 retro high") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    colors = entrupyTextFieldColors()
-                )
-                
-                Spacer(modifier = Modifier.height(12.dp))
-                
-                // Style Code and US Size in a row
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    OutlinedTextField(
-                        value = "DO7097-100",
-                        onValueChange = {},
-                        label = { Text("Style Code") },
-                        placeholder = { Text("DO7097-100") },
-                        modifier = Modifier.weight(1f),
-                        singleLine = true,
-                        colors = entrupyTextFieldColors()
-                    )
-                    
-                    OutlinedTextField(
-                        value = "9.5",
-                        onValueChange = {},
-                        label = { Text("US Size") },
-                        placeholder = { Text("9.5") },
-                        modifier = Modifier.weight(0.6f),
-                        singleLine = true,
-                        colors = entrupyTextFieldColors()
-                    )
-                }
-                
-                Spacer(modifier = Modifier.height(12.dp))
-                
-                OutlinedTextField(
-                    value = "AJ1-001",
-                    onValueChange = {},
-                    label = { Text("Customer Item ID") },
-                    placeholder = { Text("Your internal SKU") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    colors = entrupyTextFieldColors()
-                )
-                
-                Spacer(modifier = Modifier.height(20.dp))
-                
-                PreviewEntrupyButton(text = "Start Capture")
-            }
-        }
-    }
-}
 
-@Preview(showBackground = true, backgroundColor = 0xFF0A0E17)
-@Composable
-private fun PreviewMainScreenAuthorizedApparel() {
-    EntrupySampleTheme {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Background)
-                .verticalScroll(rememberScrollState())
-                .padding(20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Spacer(modifier = Modifier.height(24.dp))
-            
-            // Header
-            Text(
-                text = "entrupy",
-                style = MaterialTheme.typography.displayLarge,
-                fontWeight = FontWeight.Bold,
-                color = AccentGold
-            )
-            
             Text(
                 text = "SDK Sample",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            
+
             Spacer(modifier = Modifier.height(32.dp))
-            
+
             // Authorization Status - Authorized
             PreviewAuthorizationStatusCard(
                 isAuthorized = true,
                 statusMessage = "Login successful! Ready to capture."
             )
-            
+
             Spacer(modifier = Modifier.height(24.dp))
-            
-            // Capture Configuration - Apparel
+
+            // Capture Configuration
             PreviewEntrupyCard(
                 title = "Capture Configuration",
                 description = "Configure the item to authenticate"
             ) {
-                Text(
-                    text = "Product Category",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.align(Alignment.Start)
-                )
-                
-                Spacer(modifier = Modifier.height(8.dp))
-                
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    FilterChip(
-                        selected = false,
-                        onClick = {},
-                        label = { Text("Luxury", fontSize = 12.sp) },
-                        modifier = Modifier.weight(1f)
-                    )
-                    FilterChip(
-                        selected = false,
-                        onClick = {},
-                        label = { Text("Sneakers", fontSize = 12.sp) },
-                        modifier = Modifier.weight(1f)
-                    )
-                    FilterChip(
-                        selected = true,
-                        onClick = {},
-                        label = { Text("Apparel", fontSize = 12.sp) },
-                        modifier = Modifier.weight(1f),
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = AccentGold.copy(alpha = 0.2f),
-                            selectedLabelColor = AccentGold
-                        )
-                    )
-                }
-                
-                Spacer(modifier = Modifier.height(16.dp))
-                
                 OutlinedTextField(
                     value = "bape",
                     onValueChange = {},
@@ -680,9 +361,9 @@ private fun PreviewMainScreenAuthorizedApparel() {
                     singleLine = true,
                     colors = entrupyTextFieldColors()
                 )
-                
+
                 Spacer(modifier = Modifier.height(12.dp))
-                
+
                 OutlinedTextField(
                     value = "outerwear",
                     onValueChange = {},
@@ -692,9 +373,9 @@ private fun PreviewMainScreenAuthorizedApparel() {
                     singleLine = true,
                     colors = entrupyTextFieldColors()
                 )
-                
+
                 Spacer(modifier = Modifier.height(12.dp))
-                
+
                 OutlinedTextField(
                     value = "BAPE-001",
                     onValueChange = {},
@@ -704,9 +385,9 @@ private fun PreviewMainScreenAuthorizedApparel() {
                     singleLine = true,
                     colors = entrupyTextFieldColors()
                 )
-                
+
                 Spacer(modifier = Modifier.height(20.dp))
-                
+
                 PreviewEntrupyButton(text = "Start Capture")
             }
         }
@@ -742,7 +423,7 @@ private fun PreviewButtonStates() {
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text("Button States", color = Color.White, fontWeight = FontWeight.Bold)
-            
+
             PreviewEntrupyButton(text = "Enabled Button", enabled = true)
             PreviewEntrupyButton(text = "Disabled Button", enabled = false)
             PreviewEntrupyButton(text = "Loading...", enabled = true, isLoading = true)
