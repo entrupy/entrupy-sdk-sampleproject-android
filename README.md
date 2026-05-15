@@ -165,9 +165,8 @@ EntrupyApp.sharedInstance().loginUser(signedRequest, callback)
 ```kotlin
 // Build metadata for the item to authenticate
 val metadata = buildMap<String, Any?> {
-    put(METADATA_KEY_PRODUCT_CATEGORY, "apparel")  // or "luxury", "sneakers"
     put(METADATA_KEY_BRAND, "bape")
-    put(METADATA_KEY_ITEM_TYPE, "outerwear")       // for apparel
+    put(METADATA_KEY_ITEM_TYPE, "outerwear")
     put(METADATA_KEY_CUSTOMER_ITEM_ID, "SKU-001")
 }
 
@@ -177,79 +176,36 @@ EntrupyApp.sharedInstance().startCapture(
     callback = object : CaptureCallback {
         override fun onCaptureStarted() { /* Capture UI opened */ }
         override fun onCaptureError(errorCode: Int, description: String) { /* Handle error */ }
+        override fun onFallbackOpened() { /* Brand fallback opened */ }
     }
 )
 ```
 
 ### ConfigMetadata Reference
 
-The SDK uses a flexible metadata dictionary to configure the capture flow. Below is a complete reference of all available keys.
+The SDK uses a flexible metadata dictionary to configure the capture flow. Below are the metadata keys used by the v2 SDK.
 
-#### All Available Metadata Keys
+#### Metadata Keys
 
 | Key | Constant | Description | Example Values |
 |-----|----------|-------------|----------------|
-| `product_category` | `METADATA_KEY_PRODUCT_CATEGORY` | **Required.** Category selection | `"luxury"`, `"sneakers"`, `"apparel"` |
 | `brand` | `METADATA_KEY_BRAND` | **Required.** Brand name | `"louis vuitton"`, `"nike"`, `"bape"` |
-| `material` | `METADATA_KEY_MATERIAL` | Material type (Luxury) | `"monogram canvas"`, `"epi leather"`, `"damier ebene"` |
-| `style_name` | `METADATA_KEY_STYLE_NAME` | Product/series name (Sneakers) | `"air jordan 1 retro high"`, `"yeezy boost 350"` |
-| `style_code` | `METADATA_KEY_STYLE_CODE` | Style/SKU code (Sneakers) | `"DO7097-100"`, `"FY2903"` |
-| `us_size` | `METADATA_KEY_US_SIZE` | US shoe size (Sneakers) | `"9.5"`, `"10"`, `"11.5"` |
-| `item_type` | `METADATA_KEY_ITEM_TYPE` | Garment type (Apparel) | `"outerwear"`, `"tops"`, `"bottoms"`, `"hats"` |
+| `item_type` | `METADATA_KEY_ITEM_TYPE` | Item type / product differentiator within a brand | `"outerwear"`, `"tops"`, `"bottoms"`, `"hats"` |
 | `customer_item_id` | `METADATA_KEY_CUSTOMER_ITEM_ID` | Your internal SKU/ID | `"SKU-12345"`, `"INV-2024-001"` |
 | `upc` | `METADATA_KEY_UPC` | UPC barcode | `"194956623456"` |
 | `mode_id` | `METADATA_KEY_MODE_ID` | Operation mode | `"add"`, `"check"` |
 
-#### Category-Specific Examples
+> The v2 capture flow matches a configuration using `brand` + `item_type`. If only `brand` matches, the SDK opens the brand fallback menu scoped to that brand. If the brand doesn't match, the SDK opens the full brand selection menu.
 
-**Luxury (Handbags, Accessories)**
-```kotlin
-val luxuryMetadata = configMetadataOf(
-    METADATA_KEY_PRODUCT_CATEGORY to "luxury",
-    METADATA_KEY_BRAND to "louis vuitton",
-    METADATA_KEY_MATERIAL to "monogram canvas",      // optional
-    METADATA_KEY_CUSTOMER_ITEM_ID to "LV-NF-001"     // optional
-)
-```
+#### Example
 
-**Sneakers**
 ```kotlin
-val sneakersMetadata = configMetadataOf(
-    METADATA_KEY_PRODUCT_CATEGORY to "sneakers",
-    METADATA_KEY_BRAND to "nike",
-    METADATA_KEY_STYLE_NAME to "air jordan 1 retro high",  // optional
-    METADATA_KEY_STYLE_CODE to "DO7097-100",               // optional
-    METADATA_KEY_US_SIZE to "9.5",                         // optional
-    METADATA_KEY_CUSTOMER_ITEM_ID to "AJ1-001"             // optional
-)
-```
-
-**Apparel (Streetwear, Clothing)**
-```kotlin
-val apparelMetadata = configMetadataOf(
-    METADATA_KEY_PRODUCT_CATEGORY to "apparel",
+val metadata = configMetadataOf(
     METADATA_KEY_BRAND to "bape",
-    METADATA_KEY_ITEM_TYPE to "outerwear",           // required for apparel
-    METADATA_KEY_CUSTOMER_ITEM_ID to "BAPE-001"      // optional
+    METADATA_KEY_ITEM_TYPE to "outerwear",
+    METADATA_KEY_CUSTOMER_ITEM_ID to "BAPE-001"   // optional
 )
 ```
-
-#### Supported Brands (Examples)
-
-| Category | Example Brands |
-|----------|----------------|
-| **Luxury** | Louis Vuitton, Gucci, Chanel, Hermès, Prada, Dior, Fendi, Balenciaga |
-| **Sneakers** | Nike, Adidas, New Balance, Jordan, Yeezy, Converse |
-| **Apparel** | BAPE, Supreme, Off-White, Kith, Palace, Stüssy |
-
-#### Apparel Item Types
-
-| Item Type | Description |
-|-----------|-------------|
-| `outerwear` | Jackets, coats, hoodies |
-| `tops` | T-shirts, shirts, sweaters |
-| `bottoms` | Pants, shorts, jeans |
-| `hats` | Caps, beanies, bucket hats |
 
 ## Project Structure
 

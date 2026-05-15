@@ -17,7 +17,7 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        
+
         // Entrupy SDK - GitHub Packages
         maven {
             url = uri("https://maven.pkg.github.com/entrupy/entrupy-sdk-android")
