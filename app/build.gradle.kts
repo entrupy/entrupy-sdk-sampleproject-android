@@ -16,7 +16,7 @@ val localProperties = Properties().apply {
 
 android {
     namespace = "com.entrupy.sample"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         // ──────────────────────────────────────────────────────────────────────
@@ -35,7 +35,7 @@ android {
         applicationId = localProperties.getProperty("application.id", "com.entrupy.sample")
 
         minSdk = 24
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0.0"
 
