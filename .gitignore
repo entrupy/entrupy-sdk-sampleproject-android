@@ -71,6 +71,9 @@ lint/generated/
 lint/outputs/
 lint/tmp/
 
+# Graphify generated knowledge graph
+graphify-out/
+
 # Misc
 *.DS_Store
 Thumbs.db

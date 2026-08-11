@@ -44,6 +44,27 @@ import com.entrupy.sdk.model.METADATA_KEY_ITEM_TYPE
 import kotlinx.coroutines.launch
 
 private const val TAG = "EntrupySampleApp"
+private const val CAPTURE_WORKFLOW_KEY = "capture_workflow"
+private const val ITEM_TYPE_KEY = "item_type"
+private const val CUSTOMER_ITEM_ID_KEY = "customer_item_id"
+private const val ENTRUPY_ID_KEY = "entrupy_id"
+private const val FINGERPRINT_REGISTER_WORKFLOW = "fingerprint_register"
+private const val FINGERPRINT_COMPARE_WORKFLOW = "fingerprint_compare"
+
+private enum class CaptureMode(val label: String) {
+    Authentication("Authentication"),
+    Fingerprint("Fingerprint"),
+}
+
+private enum class FingerprintWorkflow(val label: String, val callToAction: String) {
+    Register("Register", "Register Item"),
+    Compare("Compare", "Compare Item"),
+}
+
+private enum class CompareIdentifierType(val label: String) {
+    CustomerItemId("Customer Item ID"),
+    EntrupyId("Entrupy ID"),
+}
 
 /**
  * Main screen demonstrating the complete Entrupy SDK integration flow:
@@ -84,6 +105,10 @@ fun MainScreen(modifier: Modifier = Modifier) {
     var brandId by remember { mutableStateOf("bape") }
     var itemType by remember { mutableStateOf("outerwear") }
     var customerItemId by remember { mutableStateOf("SAMPLE-ITEM-001") }
+    var entrupyId by remember { mutableStateOf("") }
+    var captureMode by remember { mutableStateOf(CaptureMode.Authentication) }
+    var fingerprintWorkflow by remember { mutableStateOf(FingerprintWorkflow.Register) }
+    var compareIdentifierType by remember { mutableStateOf(CompareIdentifierType.CustomerItemId) }
     var isCaptureLoading by remember { mutableStateOf(false) }
 
     /**
@@ -276,62 +301,261 @@ fun MainScreen(modifier: Modifier = Modifier) {
         if (isAuthorized) {
             EntrupyCard(
                 title = "Capture Configuration",
-                description = "Configure the item to authenticate"
+                description =
+                    when (captureMode) {
+                        CaptureMode.Authentication -> "Configure the item to authenticate"
+                        CaptureMode.Fingerprint ->
+                            "Register a fingerprint or compare against a registered item"
+                    }
             ) {
-                // Brand field
-                OutlinedTextField(
-                    value = brandId,
-                    onValueChange = { brandId = it },
-                    label = { Text("Brand") },
-                    placeholder = { Text("e.g., bape, supreme, louis vuitton") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    colors = entrupyTextFieldColors()
+                Text(
+                    text = "Capture Mode",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
+
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    CaptureMode.entries.forEachIndexed { index, mode ->
+                        FilterChip(
+                            selected = captureMode == mode,
+                            onClick = { captureMode = mode },
+                            label = {
+                                Text(
+                                    text = mode.label,
+                                    fontWeight =
+                                        if (captureMode == mode) {
+                                            FontWeight.Bold
+                                        } else {
+                                            FontWeight.Medium
+                                        }
+                                )
+                            },
+                            colors =
+                                FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = AccentGold,
+                                    selectedLabelColor = Color.Black,
+                                ),
+                            modifier = Modifier.weight(1f)
+                        )
+                        if (index < CaptureMode.entries.lastIndex) {
+                            Spacer(modifier = Modifier.width(8.dp))
+                        }
+                    }
+                }
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                OutlinedTextField(
-                    value = itemType,
-                    onValueChange = { itemType = it },
-                    label = { Text("Item Type") },
-                    placeholder = { Text("e.g., outerwear, tops, bottoms, hats") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    colors = entrupyTextFieldColors()
-                )
+                if (captureMode == CaptureMode.Fingerprint) {
+                    Text(
+                        text = "Fingerprint Workflow",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
 
-                Spacer(modifier = Modifier.height(12.dp))
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        FingerprintWorkflow.entries.forEachIndexed { index, workflow ->
+                            FilterChip(
+                                selected = fingerprintWorkflow == workflow,
+                                onClick = { fingerprintWorkflow = workflow },
+                                label = {
+                                    Text(
+                                        text = workflow.label,
+                                        fontWeight =
+                                            if (fingerprintWorkflow == workflow) {
+                                                FontWeight.Bold
+                                            } else {
+                                                FontWeight.Medium
+                                            }
+                                    )
+                                },
+                                colors =
+                                    FilterChipDefaults.filterChipColors(
+                                        selectedContainerColor = AccentGold,
+                                        selectedLabelColor = Color.Black,
+                                    ),
+                                modifier = Modifier.weight(1f)
+                            )
+                            if (index < FingerprintWorkflow.entries.lastIndex) {
+                                Spacer(modifier = Modifier.width(8.dp))
+                            }
+                        }
+                    }
 
-                OutlinedTextField(
-                    value = customerItemId,
-                    onValueChange = { customerItemId = it },
-                    label = { Text("Customer Item ID") },
-                    placeholder = { Text("Your internal SKU") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    colors = entrupyTextFieldColors()
-                )
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
+
+                if (
+                    captureMode == CaptureMode.Fingerprint &&
+                        fingerprintWorkflow == FingerprintWorkflow.Compare
+                ) {
+                    Text(
+                        text = "Compare Identifier",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        CompareIdentifierType.entries.forEachIndexed { index, identifierType ->
+                            FilterChip(
+                                selected = compareIdentifierType == identifierType,
+                                onClick = { compareIdentifierType = identifierType },
+                                label = {
+                                    Text(
+                                        text = identifierType.label,
+                                        fontWeight =
+                                            if (compareIdentifierType == identifierType) {
+                                                FontWeight.Bold
+                                            } else {
+                                                FontWeight.Medium
+                                            }
+                                    )
+                                },
+                                colors =
+                                    FilterChipDefaults.filterChipColors(
+                                        selectedContainerColor = AccentGold,
+                                        selectedLabelColor = Color.Black,
+                                    ),
+                                modifier = Modifier.weight(1f)
+                            )
+                            if (index < CompareIdentifierType.entries.lastIndex) {
+                                Spacer(modifier = Modifier.width(8.dp))
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
+
+                if (captureMode == CaptureMode.Authentication) {
+                    OutlinedTextField(
+                        value = brandId,
+                        onValueChange = { brandId = it },
+                        label = { Text("Brand") },
+                        placeholder = { Text("e.g., bape, supreme, louis vuitton") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        colors = entrupyTextFieldColors()
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
+
+                if (
+                    captureMode == CaptureMode.Authentication ||
+                        fingerprintWorkflow == FingerprintWorkflow.Register
+                ) {
+                    OutlinedTextField(
+                        value = itemType,
+                        onValueChange = { itemType = it },
+                        label = { Text("Item Type") },
+                        placeholder = { Text("e.g., outerwear, tops, bottoms, hats") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        colors = entrupyTextFieldColors()
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
+
+                val usesEntrupyId =
+                    captureMode == CaptureMode.Fingerprint &&
+                        fingerprintWorkflow == FingerprintWorkflow.Compare &&
+                        compareIdentifierType == CompareIdentifierType.EntrupyId
+                if (!usesEntrupyId) {
+                    OutlinedTextField(
+                        value = customerItemId,
+                        onValueChange = { customerItemId = it },
+                        label = { Text("Customer Item ID") },
+                        placeholder = {
+                            Text(
+                                if (captureMode == CaptureMode.Fingerprint) {
+                                    "Optional - enter or scan in the SDK"
+                                } else {
+                                    "Your internal SKU (optional)"
+                                }
+                            )
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        colors = entrupyTextFieldColors()
+                    )
+                } else {
+                    OutlinedTextField(
+                        value = entrupyId,
+                        onValueChange = { entrupyId = it },
+                        label = { Text("Entrupy ID") },
+                        placeholder = { Text("Required - e.g., ABC123") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        colors = entrupyTextFieldColors()
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(20.dp))
 
                 EntrupyButton(
-                    text = if (isCaptureLoading) "Starting..." else "Start Capture",
+                    text =
+                        if (isCaptureLoading) {
+                            "Starting..."
+                        } else if (captureMode == CaptureMode.Fingerprint) {
+                            fingerprintWorkflow.callToAction
+                        } else {
+                            "Start Capture"
+                        },
                     onClick = {
                         isCaptureLoading = true
 
-                        // See README.md for full list of available metadata keys
-                        val metadata = buildMap<String, Any?> {
-                            put(METADATA_KEY_BRAND, brandId.lowercase().trim())
-                            if (itemType.isNotBlank()) {
-                                put(METADATA_KEY_ITEM_TYPE, itemType.lowercase().trim())
+                        val metadata =
+                            if (captureMode == CaptureMode.Authentication) {
+                                buildMap<String, Any?> {
+                                    put(METADATA_KEY_BRAND, brandId.lowercase().trim())
+                                    if (itemType.isNotBlank()) {
+                                        put(METADATA_KEY_ITEM_TYPE, itemType.lowercase().trim())
+                                    }
+                                    if (customerItemId.isNotBlank()) {
+                                        put(METADATA_KEY_CUSTOMER_ITEM_ID, customerItemId)
+                                    }
+                                }
+                            } else {
+                                // Raw strings keep the sample compiling with SDK 2.0.10 until the
+                                // fingerprint metadata constants ship in the next SDK release.
+                                buildMap<String, Any?> {
+                                    put(
+                                        CAPTURE_WORKFLOW_KEY,
+                                        if (fingerprintWorkflow == FingerprintWorkflow.Register) {
+                                            FINGERPRINT_REGISTER_WORKFLOW
+                                        } else {
+                                            FINGERPRINT_COMPARE_WORKFLOW
+                                        }
+                                    )
+                                    if (
+                                        fingerprintWorkflow == FingerprintWorkflow.Register &&
+                                            itemType.isNotBlank()
+                                    ) {
+                                        put(ITEM_TYPE_KEY, itemType.lowercase().trim())
+                                    }
+                                    when (fingerprintWorkflow) {
+                                        FingerprintWorkflow.Register ->
+                                            if (customerItemId.isNotBlank()) {
+                                                put(CUSTOMER_ITEM_ID_KEY, customerItemId)
+                                            }
+                                        FingerprintWorkflow.Compare ->
+                                            when (compareIdentifierType) {
+                                                CompareIdentifierType.CustomerItemId ->
+                                                    if (customerItemId.isNotBlank()) {
+                                                        put(CUSTOMER_ITEM_ID_KEY, customerItemId)
+                                                    }
+                                                CompareIdentifierType.EntrupyId ->
+                                                    if (entrupyId.isNotBlank()) {
+                                                        put(
+                                                            ENTRUPY_ID_KEY,
+                                                            entrupyId.trim().uppercase(),
+                                                        )
+                                                    }
+                                            }
+                                    }
+                                }
                             }
-
-                            // Include customer_item_id if provided
-                            if (customerItemId.isNotBlank()) {
-                                put(METADATA_KEY_CUSTOMER_ITEM_ID, customerItemId)
-                            }
-                        }
 
                         entrupyApp.startCapture(
                             configMetadata = metadata,
@@ -339,7 +563,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
                                 override fun onCaptureStarted() {
                                     isCaptureLoading = false
                                     statusMessage = "Capture flow started"
-                                    Log.d(TAG, "Capture started for brand: $brandId")
+                                    Log.d(TAG, "Capture started with metadata: $metadata")
                                 }
 
                                 override fun onCaptureError(errorCode: Int, description: String) {
@@ -347,11 +571,27 @@ fun MainScreen(modifier: Modifier = Modifier) {
                                     statusMessage = "Capture failed"
                                     errorMessage = when (errorCode) {
                                         EntrupyErrorCode.NO_MATCHING_CONFIG ->
-                                            "No configuration found for brand '$brandId'"
+                                            if (captureMode == CaptureMode.Authentication) {
+                                                "No configuration found for brand '$brandId'"
+                                            } else {
+                                                "No configuration found for this fingerprint flow"
+                                            }
                                         EntrupyErrorCode.SDK_NOT_INITIALIZED ->
                                             "SDK not initialized"
                                         EntrupyErrorCode.UNAUTHORIZED_ACCESS ->
                                             "Authorization expired. Please login again."
+                                        EntrupyErrorCode.SEARCH_ITEM_NOT_FOUND ->
+                                            if (
+                                                captureMode == CaptureMode.Fingerprint &&
+                                                    fingerprintWorkflow ==
+                                                        FingerprintWorkflow.Compare &&
+                                                    compareIdentifierType ==
+                                                        CompareIdentifierType.EntrupyId
+                                            ) {
+                                                "No registered fingerprint item found for Entrupy ID '${entrupyId.trim().uppercase()}'"
+                                            } else {
+                                                description
+                                            }
                                         else -> description
                                     }
                                     showError = true
@@ -360,13 +600,21 @@ fun MainScreen(modifier: Modifier = Modifier) {
 
                                 override fun onFallbackOpened() {
                                     isCaptureLoading = false
-                                    statusMessage = "Brand fallback opened"
-                                    Log.d(TAG, "SDK opened brand fallback for '$brandId'")
+                                    statusMessage = "Capture fallback opened"
+                                    Log.d(TAG, "SDK opened fallback for metadata: $metadata")
                                 }
                             }
                         )
                     },
-                    enabled = brandId.isNotBlank() && !isCaptureLoading,
+                    enabled =
+                        !isCaptureLoading &&
+                            (captureMode != CaptureMode.Authentication || brandId.isNotBlank()) &&
+                            (
+                                captureMode != CaptureMode.Fingerprint ||
+                                    fingerprintWorkflow != FingerprintWorkflow.Compare ||
+                                    compareIdentifierType != CompareIdentifierType.EntrupyId ||
+                                    entrupyId.isNotBlank()
+                            ),
                     isLoading = isCaptureLoading,
                     icon = { Icon(Icons.Default.CameraAlt, contentDescription = null, tint = Color.Black) }
                 )

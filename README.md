@@ -181,6 +181,62 @@ EntrupyApp.sharedInstance().startCapture(
 )
 ```
 
+#### Fingerprint Register and Compare
+
+The sample keeps its current SDK 2.0.10 dependency and uses raw metadata strings so the UI can
+demonstrate the forthcoming public fingerprint contract without depending on unreleased constants.
+
+> **Runtime requirement:** Fingerprint Register and Compare require the forthcoming SDK release.
+> With SDK 2.0.10, these examples compile but the fingerprint routes are not yet available.
+
+Register requires the workflow and item type for direct routing. Customer Item ID is optional; when
+omitted, the SDK lets the user enter or scan it:
+
+```kotlin
+val registerMetadata = mapOf(
+    "capture_workflow" to "fingerprint_register",
+    "item_type" to "tops",
+)
+
+EntrupyApp.sharedInstance().startCapture(configMetadata = registerMetadata)
+```
+
+Compare requires only the workflow. The forthcoming SDK opens its editable Item ID step and searches
+after the user taps Next:
+
+```kotlin
+val compareMetadata = mapOf(
+    "capture_workflow" to "fingerprint_compare",
+)
+
+EntrupyApp.sharedInstance().startCapture(configMetadata = compareMetadata)
+```
+
+Add `"customer_item_id"` to Register or Compare metadata to prefill the editable Item ID step:
+
+```kotlin
+val compareByCustomerItemId = mapOf(
+    "capture_workflow" to "fingerprint_compare",
+    "customer_item_id" to "SKU-001",
+)
+```
+
+To skip barcode entry and compare directly against a known Entrupy authentication, send
+`"entrupy_id"` instead:
+
+```kotlin
+val compareByEntrupyId = mapOf(
+    "capture_workflow" to "fingerprint_compare",
+    "entrupy_id" to "ABC123",
+)
+```
+
+For Compare, send either `"customer_item_id"` or `"entrupy_id"`, never both. The SDK trims and
+uppercases the Entrupy ID, searches by `authentication_id`, and opens capture directly when one
+registered fingerprint session is found. A successful search with zero items ends the direct flow
+and calls `onCaptureError(EntrupyErrorCode.SEARCH_ITEM_NOT_FOUND, ...)`; it does not fall back to
+barcode entry automatically.
+
 ### ConfigMetadata Reference
 
 The SDK uses a flexible metadata dictionary to configure the capture flow. Below are the metadata keys used by the v2 SDK.
@@ -192,6 +248,7 @@ The SDK uses a flexible metadata dictionary to configure the capture flow. Below
 | `brand` | `METADATA_KEY_BRAND` | **Required.** Brand name | `"louis vuitton"`, `"nike"`, `"bape"` |
 | `item_type` | `METADATA_KEY_ITEM_TYPE` | Item type / product differentiator within a brand | `"outerwear"`, `"tops"`, `"bottoms"`, `"hats"` |
 | `customer_item_id` | `METADATA_KEY_CUSTOMER_ITEM_ID` | Your internal SKU/ID | `"SKU-12345"`, `"INV-2024-001"` |
+| `entrupy_id` | `METADATA_KEY_ENTRUPY_ID` | Direct Fingerprint Compare lookup by Entrupy authentication ID | `"ABC123"` |
 | `upc` | `METADATA_KEY_UPC` | UPC barcode | `"194956623456"` |
 | `mode_id` | `METADATA_KEY_MODE_ID` | Operation mode | `"add"`, `"check"` |
 
