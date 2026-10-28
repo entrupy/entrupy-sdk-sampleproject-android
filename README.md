@@ -237,6 +237,28 @@ registered fingerprint session is found. A successful search with zero items end
 and calls `onCaptureError(EntrupyErrorCode.SEARCH_ITEM_NOT_FOUND, ...)`; it does not fall back to
 barcode entry automatically.
 
+#### 7. Customize SDK Colors (optional)
+
+SDK screens don't inherit your app's theme. To match your app, implement `EntrupyTheme` and assign
+it in `Application.onCreate`, after `EntrupyApp.init`. Each color is nullable and falls back to the
+default Entrupy color on its own:
+
+```kotlin
+class MyAppEntrupyTheme : EntrupyTheme {
+    override val backgroundColor: Int? = Color.WHITE
+    override val foregroundColor: Int? = Color.BLACK
+    override val borderColor: Int? = Color.LTGRAY
+}
+
+EntrupyApp.sharedInstance().theme = MyAppEntrupyTheme()
+```
+
+The sample's **SDK Theme** picker switches between the default styling and three example themes
+(`theme/SampleSdkTheme.kt`). **Partial** sets only a white background, to show why a light
+background also needs a foreground color. A new theme applies to SDK flows opened after the change.
+See [UI Theme Customization](https://developer.entrupy.com/docs/mobile-sdks/android/sdk-reference/ui-theme-customization)
+for what each color changes.
+
 ### ConfigMetadata Reference
 
 The SDK uses a flexible metadata dictionary to configure the capture flow. Below are the metadata keys used by the v2 SDK.
@@ -273,6 +295,8 @@ app/src/main/java/com/entrupy/sample/
 ├── network/                     # Partner backend API
 │   ├── PartnerApi.kt
 │   └── PartnerApiClient.kt
+├── theme/
+│   └── SampleSdkTheme.kt        # SDK theme examples and picker storage
 └── ui/
     ├── screens/
     │   └── MainScreen.kt        # SDK integration demo

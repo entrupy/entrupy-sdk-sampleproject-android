@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -20,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -28,6 +30,7 @@ import com.entrupy.sample.BuildConfig
 import com.entrupy.sample.network.AuthorizationRequest
 import com.entrupy.sample.network.LoginRequest
 import com.entrupy.sample.network.PartnerApiClient
+import com.entrupy.sample.theme.SampleThemeOption
 import com.entrupy.sample.ui.theme.AccentGold
 import com.entrupy.sample.ui.theme.AccentGoldDark
 import com.entrupy.sample.ui.theme.AccentGreen
@@ -110,6 +113,8 @@ fun MainScreen(modifier: Modifier = Modifier) {
     var fingerprintWorkflow by remember { mutableStateOf(FingerprintWorkflow.Register) }
     var compareIdentifierType by remember { mutableStateOf(CompareIdentifierType.CustomerItemId) }
     var isCaptureLoading by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    var sdkTheme by remember { mutableStateOf(SampleThemeOption.stored(context)) }
 
     /**
      * Complete login flow
@@ -248,6 +253,42 @@ fun MainScreen(modifier: Modifier = Modifier) {
             isAuthorized = isAuthorized,
             statusMessage = statusMessage
         )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // SDK Theme: applies to SDK flows opened after the change
+        EntrupyCard(
+            title = "SDK Theme",
+            description = "Colors the SDK screens use, set via EntrupyApp.theme"
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                SampleThemeOption.entries.forEach { option ->
+                    FilterChip(
+                        selected = sdkTheme == option,
+                        onClick = {
+                            option.apply(context)
+                            sdkTheme = option
+                        },
+                        label = {
+                            Text(
+                                text = option.title,
+                                maxLines = 1,
+                                fontWeight =
+                                    if (sdkTheme == option) FontWeight.Bold else FontWeight.Medium
+                            )
+                        },
+                        colors =
+                            FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = AccentGold,
+                                selectedLabelColor = Color.Black,
+                            )
+                    )
+                }
+            }
+        }
 
         Spacer(modifier = Modifier.height(24.dp))
         
