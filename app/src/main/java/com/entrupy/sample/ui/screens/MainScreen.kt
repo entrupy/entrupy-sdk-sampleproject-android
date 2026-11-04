@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -104,13 +105,13 @@ fun MainScreen(modifier: Modifier = Modifier) {
         PartnerApiClient.backendUrl.contains("sample-partner-sdk-server.entrupy.com")
     }
 
-    var brandId by remember { mutableStateOf("Bape") }
-    var itemType by remember { mutableStateOf("Outerwear") }
-    var customerItemId by remember { mutableStateOf("SAMPLE-ITEM-001") }
-    var entrupyId by remember { mutableStateOf("") }
-    var captureMode by remember { mutableStateOf(CaptureMode.Authentication) }
-    var fingerprintWorkflow by remember { mutableStateOf(FingerprintWorkflow.Register) }
-    var compareIdentifierType by remember { mutableStateOf(CompareIdentifierType.CustomerItemId) }
+    var brandId by rememberSaveable { mutableStateOf("Bape") }
+    var itemType by rememberSaveable { mutableStateOf("Outerwear") }
+    var customerItemId by rememberSaveable { mutableStateOf("SAMPLE-ITEM-001") }
+    var entrupyId by rememberSaveable { mutableStateOf("") }
+    var captureMode by rememberSaveable { mutableStateOf(CaptureMode.Authentication) }
+    var fingerprintWorkflow by rememberSaveable { mutableStateOf(FingerprintWorkflow.Register) }
+    var compareIdentifierType by rememberSaveable { mutableStateOf(CompareIdentifierType.CustomerItemId) }
     var isCaptureLoading by remember { mutableStateOf(false) }
     val context = LocalContext.current
     var sdkTheme by remember { mutableStateOf(SampleThemeOption.stored(context)) }
