@@ -47,7 +47,8 @@ import com.entrupy.sdk.model.EntrupyCaptureResult
 import com.entrupy.sdk.model.EntrupyFlagId
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 
 private const val TAG = "EntrupySampleApp"
 
@@ -111,9 +112,7 @@ fun ResultsScreen(modifier: Modifier = Modifier) {
 private fun HistoryList(entrupyApp: EntrupyApp, history: AuthenticationHistory) {
     val listState = rememberLazyListState()
     LaunchedEffect(listState) {
-        listState.footerSightings().collect {
-            if (history.errorMessage == null) history.loadNextPage()
-        }
+        listState.nextPageWanted(history).collect { history.loadNextPage() }
     }
     LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
         itemsIndexed(history.items, key = { _, item -> item.entrupyId }) { index, item ->
@@ -232,15 +231,21 @@ private fun EntrupyApp.openSafely(screen: String, open: EntrupyApp.() -> Unit) {
 }
 
 /**
- * Each layout that shows the footer, with the item count of that same layout, so a layout drawn
- * before a page arrived cannot ask for one more. The footer is the last item and has no key: with
- * one, the list would hold it on screen while the first page lands above it.
+ * Each time the footer is on screen while a next page can be asked for. That turns true again once
+ * a load ends, so a refresh that brings back as many items as before still pages on. Only a layout
+ * that already holds the current items counts, so one drawn before a page arrived cannot ask for
+ * one more. The footer is the last item and has no key: with one, the list would hold it on screen
+ * while the first page lands above it.
  */
-private fun LazyListState.footerSightings(): Flow<Int> =
+private fun LazyListState.nextPageWanted(history: AuthenticationHistory): Flow<Unit> =
     snapshotFlow {
-            layoutInfo.totalItemsCount.takeIf { count ->
-                layoutInfo.visibleItemsInfo.lastOrNull()?.index == count - 1
-            }
+            val layout = layoutInfo
+            layout.totalItemsCount == history.items.size + 1 &&
+                layout.visibleItemsInfo.lastOrNull()?.index == history.items.size &&
+                !history.isLoading &&
+                !history.isLastPage &&
+                history.errorMessage == null
         }
-        .filterNotNull()
         .distinctUntilChanged()
+        .filter { it }
+        .map {}

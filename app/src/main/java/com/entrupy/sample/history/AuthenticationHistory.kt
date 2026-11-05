@@ -73,7 +73,10 @@ class AuthenticationHistory(private val entrupyApp: EntrupyApp) {
                     override fun onSearchCompleted(result: EntrupySearchItemsResult) {
                         if (page != generation) return
                         if (firstPage) items.clear()
-                        items += result.items
+                        // An item that moved between pages while paging would be listed twice,
+                        // and the list keys its rows by ID.
+                        val listed = items.mapTo(HashSet()) { it.entrupyId }
+                        items += result.items.filter { listed.add(it.entrupyId) }
                         totalCount = result.totalCount
                         currentQuery.cursor = result.nextCursor
                         isLastPage = result.nextCursor == null
