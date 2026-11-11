@@ -1,6 +1,8 @@
 package com.entrupy.sample.ui.screens
 
+import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.rememberScrollState
@@ -30,10 +32,15 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -43,6 +50,7 @@ import com.entrupy.sample.ui.theme.Background
 import com.entrupy.sample.ui.theme.Border
 import com.entrupy.sample.ui.theme.TextSecondary
 import com.entrupy.sdk.app.EntrupyApp
+import com.entrupy.sdk.listeners.SetFlagCallback
 import com.entrupy.sdk.model.EntrupyCaptureResult
 import com.entrupy.sdk.model.EntrupyFlagId
 import kotlinx.coroutines.flow.Flow
@@ -56,7 +64,8 @@ private const val TAG = "EntrupySampleApp"
  * The user's past authentications, like the Results tab of the iOS sample.
  *
  * Tap a row to open its result in the SDK. A row also offers Retake when the item has an open
- * retake request, and Market Edge when the item supports it.
+ * retake request, Market Edge when the item supports it, and Flag Result or Clear Flag when the
+ * result can be flagged. The flag UI is custom, built on `getFlagDetails` and `setFlag`.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -111,8 +120,18 @@ fun ResultsScreen(modifier: Modifier = Modifier) {
 @Composable
 private fun HistoryList(entrupyApp: EntrupyApp, history: AuthenticationHistory) {
     val listState = rememberLazyListState()
+    val context = LocalContext.current
+    var flaggingId by rememberSaveable { mutableStateOf<String?>(null) }
     LaunchedEffect(listState) {
         listState.nextPageWanted(history).collect { history.loadNextPage() }
+    }
+    flaggingId?.let { entrupyId ->
+        FlagDialog(
+            entrupyApp = entrupyApp,
+            entrupyId = entrupyId,
+            onDismiss = { flaggingId = null },
+            onFlagChanged = history::reload,
+        )
     }
     LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
         itemsIndexed(history.items, key = { _, item -> item.entrupyId }) { index, item ->
@@ -122,6 +141,13 @@ private fun HistoryList(entrupyApp: EntrupyApp, history: AuthenticationHistory) 
                 onRetake = { entrupyApp.openSafely("retake") { startRetakeCapture(item.entrupyId) } },
                 onMarketEdge = {
                     entrupyApp.openSafely("Market Edge") { displayMarketEdgeView(item.entrupyId) }
+                },
+                onFlag = {
+                    if (item.status?.flag?.isFlagged == true) {
+                        entrupyApp.clearFlag(context, item.entrupyId, onCleared = history::reload)
+                    } else {
+                        flaggingId = item.entrupyId
+                    }
                 },
             )
             if (index < history.items.lastIndex) HorizontalDivider(color = Border)
@@ -148,6 +174,7 @@ private fun AuthenticationRow(
     onOpen: () -> Unit,
     onRetake: () -> Unit,
     onMarketEdge: () -> Unit,
+    onFlag: () -> Unit,
 ) {
     Row(
         modifier =
@@ -175,6 +202,11 @@ private fun AuthenticationRow(
         }
         if (item.moreDetails?.catalogInsights?.supported == true) {
             TextButton(onClick = onMarketEdge) { Text("Market Edge", color = AccentGold) }
+        }
+        item.status?.flag?.takeIf { it.isFlaggable }?.let { flag ->
+            TextButton(onClick = onFlag) {
+                Text(if (flag.isFlagged) "Clear Flag" else "Flag Result", color = AccentGold)
+            }
         }
         Spacer(Modifier.width(4.dp))
         Icon(
@@ -228,6 +260,22 @@ private fun ErrorMessage(text: String, onRetry: () -> Unit) {
 /** The SDK throws if it was not initialized, so a tap never crashes the sample. */
 private fun EntrupyApp.openSafely(screen: String, open: EntrupyApp.() -> Unit) {
     runCatching { open() }.onFailure { Log.e(TAG, "Could not open $screen", it) }
+}
+
+/** Clears the flag right away, like the iOS sample. Clearing needs no reason. */
+private fun EntrupyApp.clearFlag(context: Context, entrupyId: String, onCleared: () -> Unit) {
+    setFlag(
+        flag = false,
+        entrupyId = entrupyId,
+        callback =
+            object : SetFlagCallback {
+                override fun onFlagSet(entrupyId: String, flag: Boolean) = onCleared()
+
+                override fun onSetFlagError(errorCode: Int, description: String) {
+                    Toast.makeText(context, "$description ($errorCode)", Toast.LENGTH_LONG).show()
+                }
+            },
+    )
 }
 
 /**
