@@ -80,7 +80,12 @@ fun FlagDialog(
                 onDismiss()
             }
 
-            override fun onSetFlagError(errorCode: Int, description: String) {
+            override fun onSetFlagError(
+                entrupyId: String,
+                flag: Boolean,
+                errorCode: Int,
+                description: String,
+            ) {
                 if (!isOpen) return
                 isSending = false
                 error = "$description ($errorCode)"
@@ -125,8 +130,14 @@ fun FlagDialog(
             when {
                 current?.canFlag == true -> {
                     val reason = selectedReason
+                    // An item with no reasons set up is flagged without one.
+                    val hasReasons = current.supportedFlagReasons.isNotEmpty()
                     val canSend =
-                        reason != null && (!reason.isMessageRequired || message.isNotBlank())
+                        if (hasReasons) {
+                            reason != null && (!reason.isMessageRequired || message.isNotBlank())
+                        } else {
+                            true
+                        }
                     TextButton(
                         enabled = canSend && !isSending,
                         onClick = {
@@ -160,7 +171,13 @@ private fun ReasonPicker(
     onMessageChange: (String) -> Unit,
 ) {
     if (reasons.isEmpty()) {
-        Text("No flag reasons are set up for this item.", color = TextSecondary)
+        Text("No flag reasons are set up for this item. You can flag it without one.")
+        OutlinedTextField(
+            value = message,
+            onValueChange = onMessageChange,
+            label = { Text("Note (optional)") },
+            modifier = Modifier.fillMaxWidth(),
+        )
         return
     }
     Text("Why are you flagging this result?")

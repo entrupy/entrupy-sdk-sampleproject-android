@@ -271,7 +271,12 @@ private fun EntrupyApp.clearFlag(context: Context, entrupyId: String, onCleared:
             object : SetFlagCallback {
                 override fun onFlagSet(entrupyId: String, flag: Boolean) = onCleared()
 
-                override fun onSetFlagError(errorCode: Int, description: String) {
+                override fun onSetFlagError(
+                    entrupyId: String,
+                    flag: Boolean,
+                    errorCode: Int,
+                    description: String,
+                ) {
                     Toast.makeText(context, "$description ($errorCode)", Toast.LENGTH_LONG).show()
                 }
             },
